@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  wordpress:
+    image: wordpress:5.0.3-php7.1-apache
+    container_name: "traefik_wp1"
+    volumes:
+      - ./data/wp1:/var/www/html
+    networks:
+      - traefik_network
+    labels:
+      - traefik.enable=true
+      - traefik.frontend.rule=Host:wp1.localhost
+    environment:
+      WORDPRESS_DB_HOST: 172.31.0.2
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: 12345#Aa?
+      WORDPRESS_DB_NAME: wp1
+
+networks:
+  traefik_network:
+    external:
+      name: traefik_network

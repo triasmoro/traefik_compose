@@ -1,0 +1,46 @@
+version: "3"
+
+services:
+  traefik:
+    image: traefik:v1.7.7-alpine
+    container_name: "traefik_service"
+    restart: always
+    ports:
+      - 80:80       # The HTTP port
+      - 8080:8080   # The Web UI (enabled by --api)
+      - 443:443
+    volumes:
+      - ./traefik.toml:/etc/traefik/traefik.toml
+      - ./access.log:/var/log/access.log
+      - ./traefik.log:/var/log/traefik.log
+      - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+    networks:
+      - traefik_network
+
+  whoami:
+    image: emilevauge/whoami
+    container_name: traefik_whoami
+    restart: always
+    networks:
+      - traefik_network
+    labels:
+      - traefik.enable=true
+      - traefik.frontend.rule=Host:whoami.localhost
+  
+  mariadb:
+    image: mariadb:10.4.0-bionic
+    container_name: traefik_mariadb
+    restart: always
+    ports:
+      - 32306:3306
+    volumes:
+      - ./data/mariadb:/var/lib/mysql
+    networks:
+      - traefik_network
+    environment:
+      MYSQL_ROOT_PASSWORD: "12345#Aa?"
+
+networks:
+  traefik_network:
+    external:
+      name: traefik_network
