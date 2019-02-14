@@ -1,0 +1,44 @@
+defaultEntryPoints = ["http", "https"]
+debug = true
+
+[api]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+    [entryPoints.http.redirect]
+    entryPoint = "https"
+  [entryPoints.https]
+  address = ":443"
+  	[entryPoints.https.tls]
+    minVersion = "VersionTLS12"
+    cipherSuites = [
+      "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+      "TLS_RSA_WITH_AES_256_GCM_SHA384"
+    ]
+
+[acme]
+entryPoint = "https"
+storage = "/etc/traefik/acme/acme.json"
+caServer = "https://acme-v02.api.letsencrypt.org/directory"
+  [acme.dnsChallenge]
+  provider = "cloudflare"
+  delayBeforeCheck = 0
+  [[acme.domains]]
+  main = "*.comgw.smallregion.com"
+
+[docker]
+endpoint = "unix:///var/run/docker.sock"
+domain = "comgw.smallregion.com"
+exposedByDefault = false
+
+[file]
+watch = true
+
+[traefikLog]
+filePath = "/var/log/traefik.log"
+format   = "json"
+
+[accessLog]
+filePath = "/var/log/access.log"
+format = "json"
